@@ -38,10 +38,10 @@ You can change the initial player in the `src/index.ts` file.
 ## Roadmap
 - [x] Fetch data from the Riot API
 - [x] Store data in a MongoDB database
+- [x] Add error handling and retries
 - [ ] Add support for more regions
 - [ ] Dockerize the application
 - [ ] Add tests
-- [ ] Add error handling and retries
 
 > [!NOTE]
 > Nasus is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc

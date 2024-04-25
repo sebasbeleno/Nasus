@@ -8,6 +8,7 @@ import { getAccountWithPuuid, getAccountWithRiotID } from "./services/Riot";
 import Player from "./models/Player";
 import Match from "./models/Match";
 import Mongoose from "mongoose";
+import Logs from "./models/Logs";
 
 class Nasus {
   firstSummonerGameName: string;
@@ -35,21 +36,35 @@ class Nasus {
   }
 
   async stack(puuid?: string) {
-    puuid = await this.savePlayerIfNotExists(puuid);
+    try {
+      puuid = await this.savePlayerIfNotExists(puuid);
 
-    let matchsIds = await getSummonerMatchesIds(puuid);
-    let randomSummonerPuuid = undefined;
+      let matchsIds = await getSummonerMatchesIds(puuid);
+      let randomSummonerPuuid = undefined;
 
-    for (let matchId of matchsIds) {
-      randomSummonerPuuid = await this.saveMatchIfNotExists(matchId);
+      for (let matchId of matchsIds) {
+        randomSummonerPuuid = await this.saveMatchIfNotExists(matchId);
+      }
+
+      this.stack(randomSummonerPuuid);
+    } catch (error) {
+      const log = new Logs({
+        message: error.message,
+        level: "error",
+        timestamp: new Date(),
+        label: error.name,
+        rateLimit: error.rateLimit,
+        meta: error.body,
+      });
+      log.save();
+      const _randomPlayer = await Player.aggregate([{ $sample: { size: 1 } }]);
+
+      this.stack(_randomPlayer[0].puuid);
     }
-
-    this.stack(randomSummonerPuuid);
   }
 
   async savePlayerIfNotExists(puuid?: string) {
     if (!puuid) {
-
       let account = await getAccountWithRiotID({
         name: this.firstSummonerGameName,
         tagLine: this.firstSummonerGameTag,
@@ -109,10 +124,12 @@ class Nasus {
       const match = await getMatch(matchId);
       const match_model = new Match(match);
 
-      await this.savePlayersFromMatch(match.info.participants.map((p) => p.puuid));
+      await this.savePlayersFromMatch(
+        match.info.participants.map((p) => p.puuid)
+      );
       await match_model.save();
 
-      return  match.info.participants[Math.floor(Math.random() * 10)].puuid;
+      return match.info.participants[Math.floor(Math.random() * 10)].puuid;
     } else {
       console.log("Match already exists");
     }
