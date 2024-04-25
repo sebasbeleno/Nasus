@@ -1,4 +1,5 @@
 import {
+  getLeague,
   getMatch,
   getSummoner,
   getSummonerMatchesIds,
@@ -61,6 +62,7 @@ class Nasus {
       }
       puuid = account.puuid;
       let summoner = await getSummoner(account.puuid);
+      const leagues = await getLeague(summoner.id);
 
       const player = new Player({
         puuid: account.puuid,
@@ -69,6 +71,7 @@ class Nasus {
         profileIconId: summoner.profileIconId,
         gameName: account.gameName,
         tagLine: account.tagLine,
+        leagues: leagues,
       });
 
       player.save();
@@ -81,6 +84,7 @@ class Nasus {
     if (!player) {
       let account = await getAccountWithPuuid(puuid);
       let summoner = await getSummoner(account.puuid);
+      const leagues = await getLeague(summoner.id);
 
       const player = new Player({
         puuid: account.puuid,
@@ -89,6 +93,7 @@ class Nasus {
         profileIconId: summoner.profileIconId,
         gameName: account.gameName,
         tagLine: account.tagLine,
+        leagues: leagues,
       });
 
       player.save();

@@ -19,3 +19,6 @@ export const getMatch = async (matchId: string) => {
   return (await api.MatchV5.get(matchId, Constants.RegionGroups.AMERICAS)).response;
 }
 
+export const getLeague = async (encryptedSummonerId: string) => {
+  return (await api.League.bySummoner(encryptedSummonerId, Constants.Regions.LAT_NORTH)).response;
+}
