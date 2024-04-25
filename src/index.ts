@@ -34,8 +34,6 @@ class Nasus {
   }
 
   async stack(puuid?: string) {
-    console.log("Stacking...", puuid)
-
     puuid = await this.savePlayerIfNotExists(puuid);
 
     let matchsIds = await getSummonerMatchesIds(puuid);
@@ -49,7 +47,6 @@ class Nasus {
   }
 
   async savePlayerIfNotExists(puuid?: string) {
-    console.log("Saving player...", puuid)
     if (!puuid) {
 
       let account = await getAccountWithRiotID({
@@ -101,7 +98,6 @@ class Nasus {
   }
 
   async saveMatchIfNotExists(matchId: string) {
-    console.log("Saving match...", matchId)
     const _matchFromDB = await Match.findOne({ metadata: { matchId } });
 
     if (!_matchFromDB) {

@@ -1,6 +1,11 @@
 import { RiotApi, Constants as TwistedConstants } from "twisted";
 
-const api = new RiotApi();
+const api = new RiotApi({
+  debug: {
+    logUrls: true,
+    logTime: true,
+  }
+});
 
 export async function getAccountWithRiotID({
   name,
