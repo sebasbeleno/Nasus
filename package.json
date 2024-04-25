@@ -1,0 +1,18 @@
+{
+  "name": "nasus",
+  "module": "index.tsx",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "mongoose": "^8.3.2",
+    "twisted": "^1.60.1"
+  }
+}
