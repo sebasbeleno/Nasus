@@ -1,7 +1,14 @@
 import Nasus from "./src";
 import Mongoose from "mongoose";
 
-const moongose = await Mongoose.connect("mongodb://localhost:27017/nasus");
+declare module "bun" {
+  interface Env {
+    MONGO_URI: string;
+    RIOT_API_KEY: string;
+  }
+}
+
+const moongose = await Mongoose.connect(Bun.env.MONGO_URI);
 
 const nasus = new Nasus({
   summonerGameName: "Beleño",
