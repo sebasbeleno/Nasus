@@ -68,7 +68,7 @@ bun run start
 
 Nasus will fetch a list of 10 recent matches from a initial player. Then, it will fetch the data of all the players in those matches. It will repeat this process for each player in the list, in a recursive way.
 
-You can change the initial player in the `src/index.ts` file.
+You can change the initial player in the `config.ts` file.
 
 ## Roadmap
 
