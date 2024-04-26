@@ -20,7 +20,8 @@ const playerSchema = new Schema({
     freshBlood: Boolean,
     tier: String,
     leaguePoints: Number
-  }]
+  }],
+  platformId: String,
 });
 
 export default mongoose.model("Player", playerSchema);

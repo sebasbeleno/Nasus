@@ -9,11 +9,14 @@ import Player from "./models/Player";
 import Match from "./models/Match";
 import Mongoose from "mongoose";
 import Logs from "./models/Logs";
+import { getPlatformId, getRegion } from "./utils";
 
 class Nasus {
   firstSummonerGameName: string;
   firstSummonerGameTag: string;
   moongose: typeof Mongoose;
+  platformId: string;
+  region: string;
 
   /**
    *
@@ -33,6 +36,8 @@ class Nasus {
     this.firstSummonerGameName = summonerGameName;
     this.firstSummonerGameTag = summonerGameTag;
     this.moongose = moongose;
+    this.platformId = getPlatformId();
+    this.region = getRegion();
   }
 
   async stack(puuid?: string) {
@@ -87,6 +92,7 @@ class Nasus {
         gameName: account.gameName,
         tagLine: account.tagLine,
         leagues: leagues,
+        platformId: this.platformId,
       });
 
       player.save();
@@ -109,6 +115,7 @@ class Nasus {
         gameName: account.gameName,
         tagLine: account.tagLine,
         leagues: leagues,
+        platformId: this.platformId,
       });
 
       player.save();

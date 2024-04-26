@@ -1,8 +1,8 @@
 export default {
   defaultSummonersByPlatformId: {
     LAT_NORTH: {
-      gameName: "Beleño",
-      tagLine: "uwu",
+      gameName: "Pataconfrito",
+      tagLine: "1909",
     },
     LAT_SOUTH: {
         gameName: "GestitoONE",
