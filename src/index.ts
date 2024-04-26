@@ -47,7 +47,7 @@ class Nasus {
       }
 
       this.stack(randomSummonerPuuid);
-    } catch (error) {
+    } catch (error: any) {
       const log = new Logs({
         message: error.message,
         level: "error",

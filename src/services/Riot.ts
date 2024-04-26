@@ -1,4 +1,5 @@
-import { RiotApi, Constants as TwistedConstants } from "twisted";
+import { RiotApi } from "twisted";
+import { getRegion } from "../utils";
 
 const api = new RiotApi({
   debug: {
@@ -19,13 +20,13 @@ export async function getAccountWithRiotID({
     await api.Account.getByRiotId(
       name,
       tagLine,
-      TwistedConstants.RegionGroups.AMERICAS
+      getRegion()
     )
   ).response;
 }
 
 export async function getAccountWithPuuid(puuid: string) {
   return (
-    await api.Account.getByPUUID(puuid, TwistedConstants.RegionGroups.AMERICAS)
+    await api.Account.getByPUUID(puuid, getRegion())
   ).response;
 }
