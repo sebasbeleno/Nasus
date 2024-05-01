@@ -12,7 +12,7 @@ declare module "bun" {
   }
 }
 
-const moongose = await Mongoose.connect(Bun.env.MONGO_URI);
+const moongose = await Mongoose.connect(Bun.env.MONGO_URI + "/nasus_" + Bun.env.PLATFORM_ID.toLowerCase());
 const defaultSummoner = config.defaultSummonersByPlatformId[Bun.env.PLATFORM_ID];
 
 const nasus = new Nasus({

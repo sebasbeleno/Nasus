@@ -62,9 +62,13 @@ class Nasus {
         meta: error.body,
       });
       log.save();
-      const _randomPlayer = await Player.aggregate([{ $sample: { size: 1 } }]);
 
-      this.stack(_randomPlayer[0].puuid);
+      if (error && error.body.status.status_code === 403) {
+        console.error("[NASUS]: Request failed with status code 403. Please ensure that your RIOT API Key is valid")
+      } else {
+        const _randomPlayer = await Player.aggregate([{ $sample: { size: 1 } }]);
+        this.stack(_randomPlayer[0].puuid);
+      }
     }
   }
 
