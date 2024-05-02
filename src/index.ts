@@ -170,7 +170,7 @@ class Nasus {
   async saveMatchIfNotExists(matchId: string) {
     const matchExist = await MatchRepository.checkIfMatchExist(matchId);
 
-    if (matchExist) {
+    if (!matchExist) {
       const match = await getMatch(matchId);
       const participantsObj = await this.savePlayersFromMatch(
         match.info.participants.map((p) => p.puuid)
@@ -187,6 +187,8 @@ class Nasus {
       return match.info.participants[Math.floor(Math.random() * 10)].puuid;
     } else {
       console.log("[NASUS]: Match already exists");
+      const match = await getMatch(matchId);
+      return match.info.participants[Math.floor(Math.random() * 10)].puuid;
     }
   }
 

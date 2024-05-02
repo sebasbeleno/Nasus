@@ -52,7 +52,7 @@ And the .env file should look like this:
 
 ```shell
 RIOT_API_KEY=YOUR_RIOT_API_KEY
-MONGO_URI=mongodb://localhost:27017/nasus
+MONGO_URI=mongodb://localhost:27017/<database> #Important! Include <database>
 REGION=LA1
 ```
 
