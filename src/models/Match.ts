@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-import MatchV5DTOs from "twisted/dist/models-dto/matches/match-v5/match.dto";
 
 const matchSchema = new Schema({
   info: {
@@ -299,20 +298,11 @@ const matchSchema = new Schema({
     /** Match id. */
     matchId: String,
     /** A list of participant PUUIDs */
-    participants: [String],
+    participants: [
+      Schema.Types.ObjectId
+    ],
   },
 });
 
-matchSchema.virtual("players", {
-  ref: "Player",
-  localField: "metadata.participants",
-  foreignField: "puuid",
-  justOne: true,
-});
-
-matchSchema.pre("find", async function (next) {
-  this.populate("players");
-  next();
-});
 
 export default mongoose.model("Match", matchSchema);

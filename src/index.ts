@@ -7,9 +7,9 @@ import {
 import { getAccountWithPuuid, getAccountWithRiotID } from "./services/Riot";
 import Player from "./models/Player";
 import Match from "./models/Match";
-import Mongoose from "mongoose";
+import Mongoose, { Schema } from "mongoose";
 import Logs from "./models/Logs";
-import { getPlatformId, getRegion } from "./utils";
+import { getMathDocument, getPlatformId, getRegion } from "./utils";
 
 class Nasus {
   firstSummonerGameName: string;
@@ -42,9 +42,9 @@ class Nasus {
 
   async stack(puuid?: string) {
     try {
-      puuid = await this.savePlayerIfNotExists(puuid);
+      const { puuid: newPuuid } = await this.savePlayerIfNotExists(puuid);
 
-      let matchsIds = await getSummonerMatchesIds(puuid);
+      let matchsIds = await getSummonerMatchesIds(newPuuid);
       let randomSummonerPuuid = undefined;
 
       for (let matchId of matchsIds) {
@@ -64,15 +64,26 @@ class Nasus {
       log.save();
 
       if (error && error.body.status.status_code === 403) {
-        console.error("[NASUS]: Request failed with status code 403. Please ensure that your RIOT API Key is valid")
+        console.error(
+          "[NASUS]: Request failed with status code 403. Please ensure that your RIOT API Key is valid"
+        );
       } else {
-        const _randomPlayer = await Player.aggregate([{ $sample: { size: 1 } }]);
+        const _randomPlayer = await Player.aggregate([
+          { $sample: { size: 1 } },
+        ]);
         this.stack(_randomPlayer[0].puuid);
       }
     }
   }
 
-  async savePlayerIfNotExists(puuid?: string) {
+  async savePlayerIfNotExists(puuid?: string): Promise<{
+    puuid: string;
+    id: Schema.Types.ObjectId;
+  }> {
+    /**
+     * If the puuid its not provided that means that its the first player of the stack.
+     * Fetch the data of the first player. This player its set on config.ts
+     */
     if (!puuid) {
       let account = await getAccountWithRiotID({
         name: this.firstSummonerGameName,
@@ -82,7 +93,10 @@ class Nasus {
       const playerFromDb = await Player.findOne({ puuid: account.puuid });
 
       if (playerFromDb) {
-        return account.puuid;
+        return {
+          puuid: account.puuid,
+          id: playerFromDb.id,
+        };
       }
       puuid = account.puuid;
       let summoner = await getSummoner(account.puuid);
@@ -101,17 +115,23 @@ class Nasus {
 
       player.save();
 
-      return puuid;
+      return {
+        puuid: account.puuid,
+        id: player.id,
+      };
     }
 
     const player = await Player.findOne({ puuid });
 
+    /**
+     * If the user its not on the DB, create it
+     */
     if (!player) {
       let account = await getAccountWithPuuid(puuid);
       let summoner = await getSummoner(account.puuid);
       const leagues = await getLeague(summoner.id);
 
-      const player = new Player({
+      const newPlayer = new Player({
         puuid: account.puuid,
         accountId: account.gameName,
         summonerLevel: summoner.summonerLevel,
@@ -122,10 +142,18 @@ class Nasus {
         platformId: this.platformId,
       });
 
-      player.save();
+      newPlayer.save();
+
+      return {
+        id: newPlayer.id,
+        puuid: account.puuid,
+      };
     }
 
-    return puuid;
+    return {
+      id: player.id,
+      puuid: puuid,
+    };
   }
 
   async saveMatchIfNotExists(matchId: string) {
@@ -133,11 +161,17 @@ class Nasus {
 
     if (!_matchFromDB) {
       const match = await getMatch(matchId);
-      const match_model = new Match(match);
-
-      await this.savePlayersFromMatch(
+      const participantsObj = await this.savePlayersFromMatch(
         match.info.participants.map((p) => p.puuid)
       );
+      const match_model = new Match({
+        ...match,
+        metadata: {
+          ...match.metadata,
+          participants: participantsObj,
+        },
+      });
+
       await match_model.save();
 
       return match.info.participants[Math.floor(Math.random() * 10)].puuid;
@@ -146,10 +180,17 @@ class Nasus {
     }
   }
 
-  async savePlayersFromMatch(participants: string[]) {
+  async savePlayersFromMatch(
+    participants: string[]
+  ): Promise<Schema.Types.ObjectId[]> {
+    const _participants: Schema.Types.ObjectId[] = [];
+
     for (let puuid of participants) {
-      await this.savePlayerIfNotExists(puuid);
+      const { id } = await this.savePlayerIfNotExists(puuid);
+      _participants.push(id);
     }
+
+    return _participants;
   }
 }
 
