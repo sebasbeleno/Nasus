@@ -5,11 +5,11 @@ import {
   getSummonerMatchesIds,
 } from "./services/LeagueOfLegends";
 import { getAccountWithPuuid, getAccountWithRiotID } from "./services/Riot";
-import Player from "./models/Player";
-import Match from "./models/Match";
 import Mongoose, { Schema } from "mongoose";
-import Logs from "./models/Logs";
-import { getMathDocument, getPlatformId, getRegion } from "./utils";
+import { getPlatformId, getRegion } from "./utils";
+import PlayerRepository from "./repositories/PlayerRepository";
+import MatchRepository from "./repositories/MatchRepository";
+import LogsRepository from "./repositories/LogsRepository";
 
 class Nasus {
   firstSummonerGameName: string;
@@ -28,7 +28,7 @@ class Nasus {
     summonerGameName: string;
     summonerGameTag: string;
   }) {
-    console.log("Nasus is ready to stack");
+    console.log("[NASUS]: Nasus is ready to stack");
     this.firstSummonerGameName = summonerGameName;
     this.firstSummonerGameTag = summonerGameTag;
     this.platformId = getPlatformId();
@@ -44,16 +44,9 @@ class Nasus {
           Bun.env.PLATFORM_ID.toLowerCase()
         )
       );
-
-      console.log(
-        Bun.env.MONGO_URI.replace(
-          "<database>",
-          Bun.env.PLATFORM_ID.toLowerCase()
-        )
-      );
       await Mongoose.connection.db.admin().command({ ping: 1 });
       console.log(
-        "Pinged your deployment. You successfully connected to MongoDB!"
+        "[NASUS]: Pinged your deployment. You successfully connected to MongoDB!"
       );
     } catch {
       // Ensures that the client will close when you finish/error
@@ -74,7 +67,7 @@ class Nasus {
 
       this.stack(randomSummonerPuuid);
     } catch (error: any) {
-      const log = new Logs({
+      await LogsRepository.saveLog({
         message: error.message,
         level: "error",
         timestamp: new Date(),
@@ -82,17 +75,15 @@ class Nasus {
         rateLimit: error.rateLimit,
         meta: error.body,
       });
-      log.save();
 
       if (error && error.body.status.status_code === 403) {
         console.error(
           "[NASUS]: Request failed with status code 403. Please ensure that your RIOT API Key is valid"
         );
       } else {
-        const _randomPlayer = await Player.aggregate([
-          { $sample: { size: 1 } },
-        ]);
-        this.stack(_randomPlayer[0].puuid);
+        const randomPlayer = await PlayerRepository.getRandomPlayerPuuid();
+
+        this.stack(randomPlayer);
       }
     }
   }
@@ -111,19 +102,23 @@ class Nasus {
         tagLine: this.firstSummonerGameTag,
       });
 
-      const playerFromDb = await Player.findOne({ puuid: account.puuid });
+      const playerExists = await PlayerRepository.checkIfPlayerExists(
+        account.puuid
+      );
 
-      if (playerFromDb) {
+      // The player exists
+      if (playerExists) {
         return {
-          puuid: account.puuid,
-          id: playerFromDb.id,
+          puuid: playerExists.puuid as string,
+          id: playerExists.id,
         };
       }
       puuid = account.puuid;
+
       let summoner = await getSummoner(account.puuid);
       const leagues = await getLeague(summoner.id);
 
-      const player = new Player({
+      const newPlayer = await PlayerRepository.savePlayer({
         puuid: account.puuid,
         accountId: account.gameName,
         summonerLevel: summoner.summonerLevel,
@@ -134,25 +129,22 @@ class Nasus {
         platformId: this.platformId,
       });
 
-      player.save();
-
       return {
         puuid: account.puuid,
-        id: player.id,
+        id: newPlayer.id,
       };
     }
 
-    const player = await Player.findOne({ puuid });
-
+    const playerExists = await PlayerRepository.checkIfPlayerExists(puuid);
     /**
      * If the user its not on the DB, create it
      */
-    if (!player) {
+    if (!playerExists) {
       let account = await getAccountWithPuuid(puuid);
       let summoner = await getSummoner(account.puuid);
       const leagues = await getLeague(summoner.id);
 
-      const newPlayer = new Player({
+      const newPlayer = await PlayerRepository.savePlayer({
         puuid: account.puuid,
         accountId: account.gameName,
         summonerLevel: summoner.summonerLevel,
@@ -162,8 +154,6 @@ class Nasus {
         leagues: leagues,
         platformId: this.platformId,
       });
-
-      newPlayer.save();
 
       return {
         id: newPlayer.id,
@@ -172,20 +162,21 @@ class Nasus {
     }
 
     return {
-      id: player.id,
+      id: playerExists.id,
       puuid: puuid,
     };
   }
 
   async saveMatchIfNotExists(matchId: string) {
-    const _matchFromDB = await Match.findOne({ metadata: { matchId } });
+    const matchExist = await MatchRepository.checkIfMatchExist(matchId);
 
-    if (!_matchFromDB) {
+    if (matchExist) {
       const match = await getMatch(matchId);
       const participantsObj = await this.savePlayersFromMatch(
         match.info.participants.map((p) => p.puuid)
       );
-      const match_model = new Match({
+
+      await MatchRepository.saveMatch({
         ...match,
         metadata: {
           ...match.metadata,
@@ -193,11 +184,9 @@ class Nasus {
         },
       });
 
-      await match_model.save();
-
       return match.info.participants[Math.floor(Math.random() * 10)].puuid;
     } else {
-      console.log("Match already exists");
+      console.log("[NASUS]: Match already exists");
     }
   }
 
