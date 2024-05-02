@@ -1,5 +1,4 @@
 import Nasus from "./src";
-import Mongoose from "mongoose";
 import type { EnvironmentPlatformId, EnvironmentRegion } from "./src/types";
 import config from "./config";
 
@@ -12,12 +11,14 @@ declare module "bun" {
   }
 }
 
-const moongose = await Mongoose.connect(Bun.env.MONGO_URI + "/nasus_" + Bun.env.PLATFORM_ID.toLowerCase());
-const defaultSummoner = config.defaultSummonersByPlatformId[Bun.env.PLATFORM_ID];
+const defaultSummoner =
+  config.defaultSummonersByPlatformId[Bun.env.PLATFORM_ID];
 
 const nasus = new Nasus({
   summonerGameName: defaultSummoner.gameName,
   summonerGameTag: defaultSummoner.tagLine,
-}, moongose);
+});
 
-nasus.stack();
+nasus.ConnectDB().then(() => {
+  nasus.stack();
+});

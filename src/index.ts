@@ -14,7 +14,6 @@ import { getMathDocument, getPlatformId, getRegion } from "./utils";
 class Nasus {
   firstSummonerGameName: string;
   firstSummonerGameTag: string;
-  moongose: typeof Mongoose;
   platformId: string;
   region: string;
 
@@ -22,22 +21,44 @@ class Nasus {
    *
    * @param param0 Initial summoner data
    */
-  constructor(
-    {
-      summonerGameName,
-      summonerGameTag,
-    }: {
-      summonerGameName: string;
-      summonerGameTag: string;
-    },
-    moongose: typeof Mongoose
-  ) {
+  constructor({
+    summonerGameName,
+    summonerGameTag,
+  }: {
+    summonerGameName: string;
+    summonerGameTag: string;
+  }) {
     console.log("Nasus is ready to stack");
     this.firstSummonerGameName = summonerGameName;
     this.firstSummonerGameTag = summonerGameTag;
-    this.moongose = moongose;
     this.platformId = getPlatformId();
     this.region = getRegion();
+  }
+
+  async ConnectDB() {
+    try {
+      // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
+      await Mongoose.connect(
+        Bun.env.MONGO_URI.replace(
+          "<database>",
+          Bun.env.PLATFORM_ID.toLowerCase()
+        )
+      );
+
+      console.log(
+        Bun.env.MONGO_URI.replace(
+          "<database>",
+          Bun.env.PLATFORM_ID.toLowerCase()
+        )
+      );
+      await Mongoose.connection.db.admin().command({ ping: 1 });
+      console.log(
+        "Pinged your deployment. You successfully connected to MongoDB!"
+      );
+    } catch {
+      // Ensures that the client will close when you finish/error
+      await Mongoose.disconnect();
+    }
   }
 
   async stack(puuid?: string) {
