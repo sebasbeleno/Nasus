@@ -52,8 +52,8 @@ And the .env file should look like this:
 
 ```shell
 RIOT_API_KEY=YOUR_RIOT_API_KEY
-MONGO_URI=mongodb://localhost:27017/<database> #Important! Include <database>
-REGION=LA1
+MONGO_URI=mongodb://localhost:27017/<database> #Important! Include <database> on the uri string
+REGION=LAT_NORTH #Can be: BRAZIL | EU_EAST | EU_WEST | KOREA | LAT_NORTH | LAT_SOUTH | AMERICA_NORTH | OCEANIA | TURKEY | RUSSIA | JAPAN | VIETNAM | TAIWAN | THAILAND | SINGAPORE | PHILIPPINES | PBE
 ```
 
 ## Usage
@@ -76,6 +76,7 @@ You can change the initial player in the `config.ts` file.
 - [x] Store data in a MongoDB database
 - [x] Add error handling and retries
 - [x] Add support for more regions
+- [ ] Record matchups
 - [ ] Dockerize the application
 - [ ] Add tests
 

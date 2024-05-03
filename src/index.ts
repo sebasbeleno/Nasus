@@ -39,7 +39,7 @@ class Nasus {
     try {
       // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
       await Mongoose.connect(
-        Bun.env.DEV_MONGO_URI.replace(
+        Bun.env.MONGO_URI.replace(
           "<database>",
           Bun.env.PLATFORM_ID.toLowerCase()
         )
@@ -183,6 +183,8 @@ class Nasus {
           participants: participantsObj,
         },
       });
+
+      //TODO: Save matchup
 
       return match.info.participants[Math.floor(Math.random() * 10)].puuid;
     } else {
