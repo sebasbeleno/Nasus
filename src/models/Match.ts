@@ -257,6 +257,44 @@ const matchSchema = new Schema({
         win: Boolean,
       },
     ],
+    teams: [
+      {
+        bans: [
+          {
+            championId: Number,
+            pickTurn: Number,
+          },
+        ],
+        objectives: {
+          baron: {
+            first: Boolean,
+            kills: Number,
+          },
+          champion: {
+            first: Boolean,
+            kills: Number,
+          },
+          drahon: {
+            first: Boolean,
+            kills: Number,
+          },
+          inhibitor: {
+            first: Boolean,
+            kills: Number,
+          },
+          riftHerald: {
+            first: Boolean,
+            kills: Number,
+          },
+          tower: {
+            first: Boolean,
+            kills: Number,
+          },
+        },
+        teamId: Number,
+        win: Boolean
+      },
+    ],
   },
   metadata: {
     /** Match data version. */
@@ -264,11 +302,8 @@ const matchSchema = new Schema({
     /** Match id. */
     matchId: String,
     /** A list of participant PUUIDs */
-    participants: [
-      Schema.Types.ObjectId
-    ],
+    participants: [Schema.Types.ObjectId],
   },
 });
-
 
 export default mongoose.model("Match", matchSchema);
