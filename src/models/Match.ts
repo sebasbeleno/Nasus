@@ -192,19 +192,6 @@ const matchSchema = new Schema({
         magicDamageDealt: Number,
         magicDamageDealtToChampions: Number,
         magicDamageTaken: Number,
-        /** New interface */
-        missions: {
-          playerScore0: Number,
-          playerScore1: Number,
-          playerScore2: Number,
-          playerScore3: Number,
-          playerScore4: Number,
-          playerScore5: Number,
-          playerScore6: Number,
-          playerScore7: Number,
-          playerScore8: Number,
-          playerScore9: Number,
-        },
         needVisionPings: Number,
         neutralMinionsKilled: Number,
         nexusKills: Number,
@@ -215,27 +202,6 @@ const matchSchema = new Schema({
         onMyWayPings: Number,
         participantId: Number,
         pentaKills: Number,
-        perks: {
-          statPerks: {
-            defense: Number,
-            flex: Number,
-            offense: Number,
-          },
-          styles: [
-            {
-              description: String,
-              selections: [
-                {
-                  perk: Number,
-                  var1: Number,
-                  var2: Number,
-                  var3: Number,
-                },
-              ],
-              style: Number,
-            },
-          ],
-        },
         physicalDamageDealt: Number,
         physicalDamageDealtToChampions: Number,
         physicalDamageTaken: Number,

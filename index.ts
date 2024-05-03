@@ -5,6 +5,7 @@ import config from "./config";
 declare module "bun" {
   interface Env {
     MONGO_URI: string;
+    DEV_MONGO_URI: string;
     RIOT_API_KEY: string;
     REGION: EnvironmentRegion;
     PLATFORM_ID: EnvironmentPlatformId;

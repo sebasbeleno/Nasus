@@ -39,7 +39,7 @@ class Nasus {
     try {
       // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
       await Mongoose.connect(
-        Bun.env.MONGO_URI.replace(
+        Bun.env.DEV_MONGO_URI.replace(
           "<database>",
           Bun.env.PLATFORM_ID.toLowerCase()
         )
